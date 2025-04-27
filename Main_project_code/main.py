@@ -220,10 +220,10 @@ class SearchEngine:
 		final_query = raw_query
 		# Autocomplete the query
 		# if self.args.autocomplete:
-			# suggested_query = self.query_completer.complete(raw_query)
-			# print(f"\nWe suggest this query: {suggested_query}")
-			# use_suggestion = input("Use suggested query? ([y]/n): ").lower() == 'y'
-			# final_query = suggested_query if use_suggestion else raw_query
+		# 	suggested_query = self.query_completer.complete(raw_query)
+		# 	print(f"\nWe suggest this query: {suggested_query}")
+		# 	use_suggestion = input("Use suggested query? ([y]/n): ").lower() == 'y'
+		# 	final_query = suggested_query if use_suggestion else raw_query
 
 		# Process documents
 		processedQuery = self.preprocessQueries([final_query])[0]

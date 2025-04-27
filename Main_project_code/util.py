@@ -6,11 +6,7 @@ import json
 import time
 import numpy as np
 import matplotlib.pyplot as plt
-# import tensorflow as tf
-# from keras.models import load_model
-# from keras.preprocessing.text import Tokenizer
-# from tensorflow.keras.preprocessing.sequence import pad_sequences
-# from keras.layers import Dense, RNN, Embedding, Bidirectional, AbstractRNNCell
+import tensorflow as tf
 from nltk.stem import WordNetLemmatizer
 from nltk.stem import PorterStemmer
 from nltk.tokenize import TreebankWordTokenizer
