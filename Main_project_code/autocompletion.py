@@ -33,14 +33,7 @@ class Trie():
                 currNode.children[ord(c)]=newNode
             currNode=currNode.children[ord(c)]
 
-    def print_tree(self, currNode, s1, l1): 
-        # Printing the tree
-        if currNode==None:
-            return
-        for i in range(self.vocab_size):
-            self.probableQueries(currNode.children[i], s1+chr(i), l1)
-        l1.append(s1)
-
+            
     def searchPrefix(self, root, pref): 
         # Searching the prefix in the trie
         pref=pref.lower()
