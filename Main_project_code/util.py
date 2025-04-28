@@ -6,7 +6,7 @@ import json
 import time
 import numpy as np
 import matplotlib.pyplot as plt
-import tensorflow as tf
+
 from nltk.stem import WordNetLemmatizer
 from nltk.stem import PorterStemmer
 from nltk.tokenize import TreebankWordTokenizer
@@ -40,3 +40,17 @@ def pos_mapping(tag):
 # Function to remove stopwords from a list of tokens
 def stopwords_sieve(tokens , stopwords_list):
 	return [token for token in tokens if token.lower() not in stopwords_list]
+
+
+#find the highest ASCII size for the characters present in the queries.
+def maxASCII(): 
+    query_json = json.load(open("./cranfield/cran_queries.json", 'r'))[:]
+    queries=[doc['query'] for doc in query_json]
+    #flattening the list of queries in one list
+    List = [c for query in queries for c in query] 
+    vocab_size = -1
+    # Loop through the list of characters and find the maximum ASCII size
+    for char in np.unique(List):
+        vocab_size=max(vocab_size, ord(char)+1)
+    return vocab_size
+

@@ -4,7 +4,7 @@ from inflectionReduction import InflectionReduction
 from stopwordRemoval import StopwordRemoval
 from informationRetrieval import InformationRetrieval
 from evaluation import Evaluation
-# from query_completion import QueryCompleter
+from autocompletion import *
 from sys import version_info
 import argparse
 import json
@@ -34,7 +34,7 @@ class SearchEngine:
 		self.stopwordRemover = StopwordRemoval()
 		self.informationRetriever = InformationRetrieval()
 		self.evaluator = Evaluation()
-		# self.query_completer = QueryCompleter()
+		self.autocompleter = Trie()
 
 	def segmentSentences(self, text):
 		"""
@@ -215,18 +215,16 @@ class SearchEngine:
 
 		#Get query
 		print("Enter query below")
-		raw_query = input()
-        
-		final_query = raw_query
-		# Autocomplete the query
-		# if self.args.autocomplete:
-		# 	suggested_query = self.query_completer.complete(raw_query)
-		# 	print(f"\nWe suggest this query: {suggested_query}")
-		# 	use_suggestion = input("Use suggested query? ([y]/n): ").lower() == 'y'
-		# 	final_query = suggested_query if use_suggestion else raw_query
+		query = input()
+
+		# If the user wants to use autocomplete, we will use the Trie data structure to get the query
+		if(self.args.autocomplete):
+			query = self.autocompleter.takeInput(query)
+
+            
 
 		# Process documents
-		processedQuery = self.preprocessQueries([final_query])[0]
+		processedQuery = self.preprocessQueries([query])[0]
 
 		# Read documents
 		docs_json = json.load(open(args.dataset + "cran_docs.json", 'r'))[:]
@@ -282,6 +280,8 @@ if __name__ == "__main__":
 		start_time = time.time()
 		searchEngine.handleCustomQuery()
 		end_time = time.time()
-		print("Time taken by the IR system to output five relevant documents: " + str(end_time - start_time) + " seconds")
+		print("-------------------------------------------------------------------------------------------------------------")
+		print(f"Time taken by the IR system to output five relevant documents: " + str(end_time - start_time) + " seconds")
+		print("-------------------------------------------------------------------------------------------------------------")
 	else:
 		searchEngine.evaluateDataset()
