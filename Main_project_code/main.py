@@ -221,8 +221,7 @@ class SearchEngine:
 		if(self.args.autocomplete):
 			query = self.autocompleter.takeInput(query)
 
-            
-
+    
 		# Process documents
 		processedQuery = self.preprocessQueries([query])[0]
 
