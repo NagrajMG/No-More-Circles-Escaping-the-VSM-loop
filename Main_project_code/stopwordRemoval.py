@@ -14,13 +14,13 @@ class StopwordRemoval():
 		Returns
 		-------
 		list
-			A list of lists where each sub-list is a sequence of tokens
+			A list of tokens
 			representing a sentence with stopwords removed
 		"""
         # Curated stopwords list from NLTK
 		stopwords_list = set(stopwords.words("english"))
 		# Loop over the list of list of tokens and remove stopwords from each list
-		stopwordRemovedText = [stopwords_sieve(tokens , stopwords_list) for tokens in text]
+		stopwordRemovedText = [token for tokens in text for token in stopwords_sieve(tokens, stopwords_list)]
 		return stopwordRemovedText
 	
 	def fromCorpus(self, text):
@@ -35,7 +35,7 @@ class StopwordRemoval():
 		Returns
 		-------
 		list
-			A list of lists where each sub-list is a sequence of tokens
+			A list of tokens
 			representing a sentence with stopwords removed
 		"""
 		# Load stopwords from a file
@@ -43,7 +43,7 @@ class StopwordRemoval():
 		with open(r'Main_project_code\corpus_based_stopwords.json', 'r') as f:
 			stopwords_list = json.load(f)
 		# Loop over the list of list of tokens and remove stopwords from each list
-		stopwordRemovedText = [stopwords_sieve(tokens , stopwords_list) for tokens in text]
+		stopwordRemovedText = [token for tokens in text for token in stopwords_sieve(tokens, stopwords_list)]
 		return stopwordRemovedText
 	
         

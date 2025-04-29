@@ -1,10 +1,8 @@
 from util import *
 from collections import defaultdict
-import numpy as np
-from math import log10, sqrt
 class InformationRetrieval():
 
-    def __init__(self):
+    def _init_(self):
         self.index = None
         # self.start_time = None
         # self.end_time = None
@@ -27,16 +25,18 @@ class InformationRetrieval():
         """
         self.docs = docs
         posting = {}
-        for id in docIDs:
-            doc = docs[id-1]
-            for sentence in doc:
-                for word in sentence: # sub-sub list is a sentence
-                    if word.isalpha():
-                        word = word.lower()
-                        if word not in posting:
-                            posting[word] = []
-                        # Add the document ID to the posting list for the word
-                        posting[word].append(id)    
+        # Iterating over the documents
+        for id in docIDs: 
+            doc=docs[id-1]
+            #Iterating over the words in the document
+            for word in doc: 
+                 #Checking if the word is an alphabet
+                 if word.isalpha(): 
+                    #Checking if the word is present in the posting dictionary
+                    if word not in posting: 
+                        posting[word]=[]
+                    posting[word].append(id)
+  
         self.index = posting
         self.IDFvalues(self.index, self.docs)
         self.transformDocs()
@@ -51,7 +51,7 @@ class InformationRetrieval():
             # Iterating over keys of postings
             for key in index.keys():
                 d = len(index[key])
-                idf[key] = math.log2(D/d)
+                idf[key] = log10(D/d)
             self.idf = idf  
 
     def transformDocs(self):
@@ -70,8 +70,8 @@ class InformationRetrieval():
             docvectors.append(docvector)
 
         # Storing the document vectors with tfidf 
-        self.docvectors=docvectors   
-        print(f"Shape of document vectors: ",np.array(docvectors).shape)  
+        self.docvectors = docvectors   
+        # print(f"Shape of document vectors: ",np.array(docvectors).shape)  
 
     def transformQuery(self, queries):
         """Building the TFIDF for the query"""
@@ -87,8 +87,9 @@ class InformationRetrieval():
                 queryvector[keyid]=  tf  *  self.idf.get(key,0)
             queryvectors.append(queryvector)
         # Storing the qyery vectors with tfidf 
-        self.queryvectors=queryvectors   
-        print(f"Shape of query vectors: ",np.array(queryvectors).shape)        
+          
+        # print(f"Shape of query vectors: ",np.array(queryvectors).shape) 
+        return queryvectors       
 
     def LSI(self, k, docvectors, queryvectors): 
         """
@@ -121,7 +122,7 @@ class InformationRetrieval():
         # Iterating through all queries
         for query in queryvectors:
             # Transformed the query into the latent space using the SVD components
-            hidden_query = np.dot(query, U_k)@np.linalg.inv(S_k)
+            hidden_query = np.dot(query, U_k)@np.linalg.pinv(S_k)
             hidden_queries.append(hidden_query)
         # Iterating through all documents
         for id in range(len(docvectors)):
@@ -146,10 +147,22 @@ class InformationRetrieval():
             A list of lists of integers where the ith sub-list is a list of IDs
             of documents in their predicted order of relevance to the ith query
         """
-        
+        queryvectors = self.transformQuery(queries) # Transform the queries into tfidf vectors
+        # Accessing the document vectors
+        docvectors = self.docvectors
+        if method=='LSI':
+            docvectors, queryvectors=self.LSI(k=130, docvectors=docvectors, queryvectors=queryvectors)
+            return self.orderDocs(docvectors, queryvectors)
+        elif method == 'VSM':
+            return self.orderDocs(docvectors, queryvectors)
+        else:
+            print(f'Invalid model argument: {method}')
+            print(f'Available Methods: VSM, LSI')
+            quit()
+
     
     
-    def orderDocs(self, docvectors, queryvectors, k): 
+    def orderDocs(self, docvectors, queryvectors, k = 5): 
         """ Order the documents based on their relevance to the queries using cosine similarity"""
         doc_IDs_ordered=[]
 		# Iterating over the queries
@@ -162,7 +175,6 @@ class InformationRetrieval():
                 #Computing the norm of the document vector
                 docNorm=np.linalg.norm(docvectors[doc_id]) 
                 if queryNorm!=0 and docNorm!=0:
-
                     cosine=np.dot(query, docvectors[doc_id])/(queryNorm*docNorm) 
                 else:
                     cosine=0
@@ -170,4 +182,4 @@ class InformationRetrieval():
             scores = sorted(temp.items(), key=lambda item: item[1], reverse=True)[:k] 
             doc_IDs_ordered.append([doc[0] for doc in scores])
             # self.end_time = time.time()
-        return doc_IDs_ordered    
+        return doc_IDs_ordered

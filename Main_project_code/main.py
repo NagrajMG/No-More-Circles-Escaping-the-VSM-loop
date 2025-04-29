@@ -166,9 +166,13 @@ class SearchEngine:
 
 		# Build document index
 		self.informationRetriever.buildIndex(processedDocs, doc_ids)
-		# Rank the documents for each query
-		doc_IDs_ordered = self.informationRetriever.rank(processedQueries)
 
+		# Accessing the model args
+		model_args = self.args.model
+
+		# Rank the documents for each query and the method to use
+		doc_IDs_ordered = self.informationRetriever.rank(processedQueries, model_args)
+        
 		# Read relevance judements
 		qrels = json.load(open(args.dataset + "cran_qrels.json", 'r'))[:]
 
@@ -221,7 +225,7 @@ class SearchEngine:
 		if(self.args.autocomplete):
 			query = self.autocompleter.takeInput(query)
 
-    
+        
 		# Process documents
 		processedQuery = self.preprocessQueries([query])[0]
 
@@ -235,7 +239,9 @@ class SearchEngine:
 		# Build document index
 		self.informationRetriever.buildIndex(processedDocs, doc_ids)
 		# Rank the documents for the query
-		doc_IDs_ordered = self.informationRetriever.rank([processedQuery])[0]
+		model_args = self.args.model
+
+		doc_IDs_ordered = self.informationRetriever.rank([processedQuery], model_args)[0]
 
 		# Print the IDs of first five documents
 		print("\nTop five document IDs : ")

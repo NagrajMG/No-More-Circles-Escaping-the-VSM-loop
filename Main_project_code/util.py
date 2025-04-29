@@ -6,6 +6,7 @@ import json
 import time
 import numpy as np
 import matplotlib.pyplot as plt
+from math import log10, sqrt
 import math
 from nltk.stem import WordNetLemmatizer
 from nltk.stem import PorterStemmer
