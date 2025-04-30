@@ -149,6 +149,10 @@ class SearchEngine:
 		  for all queries in the Cranfield dataset
 		- produces graphs of the evaluation metrics in the output folder
 		"""
+		if self.args.model == "LSI":
+			self.args.out_folder += "final_model/"
+		else:
+			self.args.out_folder += "baseline/"
 
 		# Read queries
 		queries_json = json.load(open(args.dataset + "cran_queries.json", 'r'))[:]
@@ -169,6 +173,7 @@ class SearchEngine:
 
 		# Accessing the model args
 		model_args = self.args.model
+
 
 		# Rank the documents for each query and the method to use
 		doc_IDs_ordered = self.informationRetriever.rank(processedQueries, model_args)
@@ -210,8 +215,85 @@ class SearchEngine:
 		plt.title("Evaluation Metrics - Cranfield Dataset")
 		plt.xlabel("k")
 		plt.savefig(args.out_folder + "eval_plot.png")
-
+    
+	def tuningLSI(self):
 		
+		# Read queries
+		queries_json = json.load(open(args.dataset + "cran_queries.json", 'r'))[:]
+		query_ids, queries = [item["query number"] for item in queries_json], \
+								[item["query"] for item in queries_json]
+		# Process queries 
+		processedQueries = self.preprocessQueries(queries)
+
+		# Read documents
+		docs_json = json.load(open(args.dataset + "cran_docs.json", 'r'))[:]
+		doc_ids, docs = [item["id"] for item in docs_json], \
+								[item["body"] for item in docs_json]
+		# Process documents
+		processedDocs = self.preprocessDocs(docs)
+
+		# Build document index
+		self.informationRetriever.buildIndex(processedDocs, doc_ids)
+
+		# Read relevance judements
+		qrels = json.load(open(args.dataset + "cran_qrels.json", 'r'))[:]
+
+		k_values = list(range(10, 251, 10))
+		recall_at_k = 6
+		best_k_recall = -1
+		best_recall = -1
+		recall_scores = []
+		MAP_scores = []
+		best_k_map = -1
+		best_map = -1
+
+        # Transform the documents into tfidf vectors
+		queryvectors = self.informationRetriever.transformQuery(processedQueries)
+
+		# Preparing a log file to store the results
+		log_path = self.args.out_folder + "lsi_tuning_log.csv"
+
+		with open(log_path, mode='w', newline='') as logfile:
+			writer = csv.writer(logfile)
+			writer.writerow(["k", "Recall@6", "MAP@6"])
+			for k in k_values:
+				print(f"Evaluating k = {k}...")
+				docs_k, queries_k = self.informationRetriever.LSI(k, self.informationRetriever.docvectors, queryvectors)
+				ranked_docs = self.informationRetriever.orderDocs(docs_k, queries_k, k=recall_at_k)
+				recall = self.evaluator.meanRecall(ranked_docs, query_ids, qrels, recall_at_k)
+				recall_scores.append(recall)
+				MAP = self.evaluator.meanAveragePrecision(ranked_docs, query_ids, qrels, recall_at_k)
+				MAP_scores.append(MAP)
+				print(f"Recall@{recall_at_k} = {recall:.4f} and MAP@{recall_at_k} = {MAP:.4f}")
+				# Write the k and recall to the log file
+				writer.writerow([k, recall, MAP])
+			
+				if recall > best_recall:
+					best_k_recall = k
+					best_recall = recall
+				if MAP > best_map:
+					best_k_map = k
+					best_map = MAP
+		
+		plt.figure(figsize=(10, 5))
+		plt.plot(k_values, recall_scores, label=f"Recall@{recall_at_k}", marker='o')
+		plt.plot(k_values, MAP_scores, label=f"MAP@{recall_at_k}", marker='s')
+		plt.xlabel("SVD Components (k)")
+		plt.ylabel("Score")
+		plt.title("LSI Hyperparameter Tuning - Recall and MAP vs k")
+		plt.grid(True)
+		plt.legend()
+		plt.savefig(self.args.out_folder + "lsi_tuning_plot.png")
+		plt.show()
+
+		print(f"\nBest SVD k = {best_k_recall} with Recall@{recall_at_k} = {best_recall:.4f}")
+		print(f"Best SVD k = {best_k_map} with MAP@{recall_at_k} = {best_map:.4f}")
+		# Plot the recall and MAP scores
+		print(f"Log saved at: {log_path}")		
+		
+
+
+
 	def handleCustomQuery(self):
 		"""
 		Take a custom query as input and return top five relevant documents
@@ -245,7 +327,7 @@ class SearchEngine:
 
 		# Print the IDs of first five documents
 		print("\nTop five document IDs : ")
-		for id_ in doc_IDs_ordered[:5]:
+		for id_ in doc_IDs_ordered[:10]:
 			print(id_)
 
 
@@ -259,7 +341,7 @@ if __name__ == "__main__":
 	parser.add_argument('-model', default='LSI', help="Model Type [VSM|LSI]")
 	parser.add_argument('-dataset', default = "cranfield/", 
 						help = "Path to the dataset folder")
-	parser.add_argument('-out_folder', default = "Main_project_output/final_model/", 
+	parser.add_argument('-out_folder', default = "Main_project_output/", 
 						help = "Path to output folder")
 	parser.add_argument('-segmenter', default = "punkt",
 	                    help = "Sentence Segmenter Type [naive|punkt]")
@@ -273,6 +355,8 @@ if __name__ == "__main__":
 						help = "Take custom query as input")
 	parser.add_argument('-autocomplete', action='store_true',
                         help="Autocomplete")
+	parser.add_argument('-findK', default = "False",
+						help = "Find the best k for LSI")
 	
 	# Parse the input arguments
 	args = parser.parse_args()
@@ -288,5 +372,7 @@ if __name__ == "__main__":
 		print("-------------------------------------------------------------------------------------------------------------")
 		print(f"Time taken by the IR system to output five relevant documents: " + str(end_time - start_time) + " seconds")
 		print("-------------------------------------------------------------------------------------------------------------")
+	elif args.findK == "True" and args.model == "LSI":
+		searchEngine.tuningLSI()
 	else:
 		searchEngine.evaluateDataset()

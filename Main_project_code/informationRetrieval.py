@@ -71,7 +71,7 @@ class InformationRetrieval():
 
         # Storing the document vectors with tfidf 
         self.docvectors = docvectors   
-        # print(f"Shape of document vectors: ",np.array(docvectors).shape)  
+        print(f"Shape of document vectors: ",np.array(docvectors).shape)  
 
     def transformQuery(self, queries):
         """Building the TFIDF for the query"""
@@ -88,7 +88,7 @@ class InformationRetrieval():
             queryvectors.append(queryvector)
         # Storing the qyery vectors with tfidf 
           
-        # print(f"Shape of query vectors: ",np.array(queryvectors).shape) 
+        print(f"Shape of query vectors: ",np.array(queryvectors).shape) 
         return queryvectors       
 
     def LSI(self, k, docvectors, queryvectors): 
@@ -151,7 +151,7 @@ class InformationRetrieval():
         # Accessing the document vectors
         docvectors = self.docvectors
         if method=='LSI':
-            docvectors, queryvectors=self.LSI(k=130, docvectors=docvectors, queryvectors=queryvectors)
+            docvectors, queryvectors=self.LSI(k=160, docvectors=docvectors, queryvectors=queryvectors)
             return self.orderDocs(docvectors, queryvectors)
         elif method == 'VSM':
             return self.orderDocs(docvectors, queryvectors)
@@ -162,7 +162,7 @@ class InformationRetrieval():
 
     
     
-    def orderDocs(self, docvectors, queryvectors, k = 5): 
+    def orderDocs(self, docvectors, queryvectors, k = 10): 
         """ Order the documents based on their relevance to the queries using cosine similarity"""
         doc_IDs_ordered=[]
 		# Iterating over the queries
