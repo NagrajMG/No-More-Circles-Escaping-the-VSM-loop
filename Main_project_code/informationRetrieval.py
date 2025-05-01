@@ -89,7 +89,7 @@ class InformationRetrieval():
         # Storing the qyery vectors with tfidf 
           
         print(f"Shape of query vectors: ",np.array(queryvectors).shape) 
-        return queryvectors       
+        return queryvectors    
 
     def LSI(self, k, docvectors, queryvectors): 
         """
@@ -116,21 +116,10 @@ class InformationRetrieval():
         VT_k = VT[:k, :] # Retain the first k rows of VT
         S_k = np.diag(S[:k]) # Create a diagonal matrix of the first k singular values
         
-        hidden_docs = []
-        hidden_queries = []
+        hidden_docs = (S_k @ VT_k).T
+        hidden_queries = np.array(queryvectors) @ U_k @ np.linalg.pinv(S_k) 
 
-        # Iterating through all queries
-        for query in queryvectors:
-            # Transformed the query into the latent space using the SVD components
-            hidden_query = np.dot(query, U_k)@np.linalg.pinv(S_k)
-            hidden_queries.append(hidden_query)
-        # Iterating through all documents
-        for id in range(len(docvectors)):
-            # Transformed the document into the latent space using the SVD components
-            hidden_doc = VT_k.T[id]   # Here, shape(VT_k) is (concepts, documents) here, transpose for accesing documents
-            hidden_docs.append(hidden_doc)
-
-        return np.array(hidden_docs), np.array(hidden_queries)
+        return hidden_docs, hidden_queries
     
     def rank(self, queries, method):
         """
@@ -151,7 +140,10 @@ class InformationRetrieval():
         # Accessing the document vectors
         docvectors = self.docvectors
         if method=='LSI':
-            docvectors, queryvectors=self.LSI(k=160, docvectors=docvectors, queryvectors=queryvectors)
+            docvectors, queryvectors=self.LSI(k= 160 , docvectors=docvectors, queryvectors=queryvectors)
+            # kmeans_model = MiniBatchKMeans(n_clusters=40, random_state=42)
+            # doc_labels = kmeans_model.fit_predict(docvectors)
+            # cluster_id = kmeans_model.predict(queryvectors.reshape(1, -1))[0]
             return self.orderDocs(docvectors, queryvectors)
         elif method == 'VSM':
             return self.orderDocs(docvectors, queryvectors)

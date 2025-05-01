@@ -35,6 +35,8 @@ class SearchEngine:
 		self.informationRetriever = InformationRetrieval()
 		self.evaluator = Evaluation()
 		self.autocompleter = Trie()
+		self.start_time = None
+		self.end_time = None
 
 	def segmentSentences(self, text):
 		"""
@@ -149,7 +151,7 @@ class SearchEngine:
 		  for all queries in the Cranfield dataset
 		- produces graphs of the evaluation metrics in the output folder
 		"""
-		if self.args.model == "LSI":
+		if self.args.model == "LSI" or self.args.model == None:
 			self.args.out_folder += "final_model/"
 		else:
 			self.args.out_folder += "baseline/"
@@ -218,6 +220,11 @@ class SearchEngine:
     
 	def tuningLSI(self):
 		
+		if self.args.model == "LSI" :
+			self.args.out_folder += "final_model/"
+		else:
+			self.args.out_folder += "baseline/"
+
 		# Read queries
 		queries_json = json.load(open(args.dataset + "cran_queries.json", 'r'))[:]
 		query_ids, queries = [item["query number"] for item in queries_json], \
@@ -303,11 +310,13 @@ class SearchEngine:
 		print("Enter query below")
 		query = input()
 
+	
 		# If the user wants to use autocomplete, we will use the Trie data structure to get the query
 		if(self.args.autocomplete):
 			query = self.autocompleter.takeInput(query)
-
-        
+			
+		self.start_time = time.time()
+	
 		# Process documents
 		processedQuery = self.preprocessQueries([query])[0]
 
@@ -324,6 +333,8 @@ class SearchEngine:
 		model_args = self.args.model
 
 		doc_IDs_ordered = self.informationRetriever.rank([processedQuery], model_args)[0]
+
+		self.end_time = time.time()
 
 		# Print the IDs of first five documents
 		print("\nTop five document IDs : ")
@@ -357,6 +368,8 @@ if __name__ == "__main__":
                         help="Autocomplete")
 	parser.add_argument('-findK', default = "False",
 						help = "Find the best k for LSI")
+	parser.add_argument('-clustering', default = "False",
+						help = "Perform clustering")
 	
 	# Parse the input arguments
 	args = parser.parse_args()
@@ -366,11 +379,11 @@ if __name__ == "__main__":
 
 	# Either handle query from user or evaluate on the complete dataset 
 	if args.custom:
-		start_time = time.time()
+		# start_time = time.time()
 		searchEngine.handleCustomQuery()
-		end_time = time.time()
+		# end_time = time.time()
 		print("-------------------------------------------------------------------------------------------------------------")
-		print(f"Time taken by the IR system to output five relevant documents: " + str(end_time - start_time) + " seconds")
+		print(f"Time taken by the IR system to output five relevant documents: " + str(searchEngine.end_time - searchEngine.start_time) + " seconds")
 		print("-------------------------------------------------------------------------------------------------------------")
 	elif args.findK == "True" and args.model == "LSI":
 		searchEngine.tuningLSI()

@@ -20,6 +20,7 @@ nltk.download('averaged_perceptron_tagger_eng')
 nltk.download('wordnet')
 nltk.download('stopwords')
 nltk.download('punkt')
+from sklearn.cluster import MiniBatchKMeans
 # Add any utility functions here
 
 delimiter = r'[.?!]'
