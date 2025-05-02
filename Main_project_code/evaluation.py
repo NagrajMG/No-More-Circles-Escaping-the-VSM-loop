@@ -69,6 +69,9 @@ class Evaluation():
 		float
 			The mean precision value as a number between 0 and 1
 		"""
+
+		self.precision_vsm = []
+		self.precision_lsi = []
         # Number of queries
 		num_queries = len(query_ids)
 		# Error handling if num_queries is 0
@@ -88,6 +91,8 @@ class Evaluation():
 			precision = self.queryPrecision(query_docs, query_id, relevant_docs, k)
 			# Append the precision to the list
 			precisions.append(precision)
+			# self.precision_vsm.append(precision)
+			self.precision_lsi.append(precision)
 		# Calculate mean precision
 		meanPrecision = sum(precisions) / num_queries 
 		return meanPrecision
@@ -249,6 +254,8 @@ class Evaluation():
 		# Number of queries
 		num_queries = len(query_ids)
 		# Error handling if num_queries is 0
+		self.fscore_vsm = []
+		self.fscore_lsi = []
 		if num_queries == 0:
 			print("Error: No queries provided.")
 			return -1
@@ -265,6 +272,8 @@ class Evaluation():
 			fscore = self.queryFscore(query_docs, query_id, relevant_docs, k)
 			# Append the fscore to the list
 			fscores.append(fscore)
+			# self.fscore_vsm.append(fscore)
+			self.fscore_lsi.append(fscore)
 		# Calculate mean fscore
 		meanFscore = sum(fscores) / num_queries
 		return meanFscore
@@ -365,6 +374,8 @@ class Evaluation():
 		float
 			The mean nDCG value as a number between 0 and 1
 		"""
+		self.ndcg_vsm = []
+		self.ndcg_lsi = []
         # Number of queries
 		num_queries = len(query_ids)
 		# Error handling if num_queries is 0
@@ -382,6 +393,8 @@ class Evaluation():
 			nDCG = self.queryNDCG(query_docs, query_id, qrels, k)
             # Append the nDCG to the list
 			nDCGs.append(nDCG)
+			# self.ndcg_vsm.append(nDCG)
+			self.ndcg_lsi.append(nDCG)
 		# Calculate mean nDCG
 		meanNDCG = sum(nDCGs) / num_queries
 
@@ -452,7 +465,8 @@ class Evaluation():
 		float
 			The MAP value as a number between 0 and 1
 		"""
-		
+		self.ap_vsm = []
+		self.ap_lsi = []
         # Number of queries
 		num_queries = len(query_ids)
 		# Error handling if num_queries is 0
@@ -472,7 +486,9 @@ class Evaluation():
 			avg_precision = self.queryAveragePrecision(query_docs, query_id, relevant_docs, k)
 			# Append the average precision to the list
 			avg_precisions.append(avg_precision)
-			# self.map_vsm.append(avg_precision)
+			# self.ap_vsm.append(avg_precision)
+			self.ap_lsi.append(avg_precision)
+
 		# Calculate mean average precision
 		meanAveragePrecision = sum(avg_precisions) / num_queries if num_queries > 0 else 0
 		
@@ -482,4 +498,64 @@ class Evaluation():
 		with open(filename, "w") as f:
 			f.write("query_id,recall\n")
 			for i, score in enumerate(self.recall_lsi, 1):
+				f.write(f"{i},{score:.4f}\n")
+
+	
+	
+	def saveRecallVSM(self, filename="TestScores/recallVSM.csv"):
+		with open(filename, "w") as f:
+			f.write("query_id,recall\n")
+			for i, score in enumerate(self.recall_vsm, 1):
+				f.write(f"{i},{score:.4f}\n")
+	
+	def savePrecisionVSM(self, filename="TestScores/precisionVSM.csv"):
+		with open(filename, "w") as f:
+			f.write("query_id,precision\n")
+			for i, score in enumerate(self.precision_vsm, 1):
+				f.write(f"{i},{score:.4f}\n")
+
+	def saveFscoreVSM(self, filename="TestScores/fscoreVSM.csv"):
+		with open(filename, "w") as f:
+			f.write("query_id,fscore\n")
+			for i, score in enumerate(self.fscore_vsm, 1):
+				f.write(f"{i},{score:.4f}\n")
+
+
+	def savenDCGVSM(self, filename="TestScores/nDCGVSM.csv"):
+		with open(filename, "w") as f:
+			f.write("query_id,nDCG\n")
+			for i, score in enumerate(self.ndcg_vsm, 1):
+				f.write(f"{i},{score:.4f}\n")
+
+	def saveAPVSM(self, filename="TestScores/APVSM.csv"):
+		with open(filename, "w") as f:
+			f.write("query_id,AP\n")
+			for i, score in enumerate(self.ap_vsm, 1):
+				f.write(f"{i},{score:.4f}\n")
+	
+	
+	
+	def savePrecisionLSI(self, filename="TestScores/precisionLSI.csv"):
+		with open(filename, "w") as f:
+			f.write("query_id,precision\n")
+			for i, score in enumerate(self.precision_lsi, 1):
+				f.write(f"{i},{score:.4f}\n")
+
+	def saveFscoreLSI(self, filename="TestScores/fscoreLSI.csv"):
+		with open(filename, "w") as f:
+			f.write("query_id,fscore\n")
+			for i, score in enumerate(self.fscore_lsi, 1):
+				f.write(f"{i},{score:.4f}\n")
+
+
+	def savenDCGLSI(self, filename="TestScores/nDCGLSI.csv"):
+		with open(filename, "w") as f:
+			f.write("query_id,nDCG\n")
+			for i, score in enumerate(self.ndcg_lsi, 1):
+				f.write(f"{i},{score:.4f}\n")
+
+	def saveAPLSI(self, filename="TestScores/APLSI.csv"):
+		with open(filename, "w") as f:
+			f.write("query_id,AP\n")
+			for i, score in enumerate(self.ap_lsi, 1):
 				f.write(f"{i},{score:.4f}\n")

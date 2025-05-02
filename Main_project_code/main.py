@@ -208,6 +208,11 @@ class SearchEngine:
 				str(k) + " : " + str(MAP) + ", " + str(nDCG))
         
 		self.evaluator.saveRecallLSI()
+		self.evaluator.savePrecisionLSI()
+		self.evaluator.saveFscoreLSI()
+		self.evaluator.saveAPLSI()
+		self.evaluator.savenDCGLSI()
+
 		# Plot the metrics and save plot 
 		plt.plot(range(1, 11), precisions, label="Precision")
 		plt.plot(range(1, 11), recalls, label="Recall")
