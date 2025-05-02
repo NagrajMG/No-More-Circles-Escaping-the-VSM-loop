@@ -160,6 +160,8 @@ class Evaluation():
 		float
 			The mean recall value as a number between 0 and 1
 		"""
+		self.recall_vsm = []
+		self.recall_lsi = []
 		# Number of queries
 		num_queries = len(query_ids)
 		# Error handling if num_queries is 0
@@ -175,10 +177,12 @@ class Evaluation():
 			query_docs = doc_IDs_ordered[i]
 			# Get the list of relevant documents for the query
 			relevant_docs = [int(doc['id']) for doc in qrels if int(doc['query_num']) == query_id]
-			# Calculate recall for the current query
+			# Calculate recall for the current query=
 			recall = self.queryRecall(query_docs, query_id, relevant_docs, k)
 			# Append the recall to the list
 			recalls.append(recall)
+			# self.recall_vsm.append(recall)
+			self.recall_lsi.append(recall)
 		# Calculate mean recall
 		meanRecall = sum(recalls) / num_queries 
 		return meanRecall
@@ -448,6 +452,7 @@ class Evaluation():
 		float
 			The MAP value as a number between 0 and 1
 		"""
+		
         # Number of queries
 		num_queries = len(query_ids)
 		# Error handling if num_queries is 0
@@ -467,7 +472,14 @@ class Evaluation():
 			avg_precision = self.queryAveragePrecision(query_docs, query_id, relevant_docs, k)
 			# Append the average precision to the list
 			avg_precisions.append(avg_precision)
-
+			# self.map_vsm.append(avg_precision)
 		# Calculate mean average precision
 		meanAveragePrecision = sum(avg_precisions) / num_queries if num_queries > 0 else 0
+		
 		return meanAveragePrecision
+	
+	def saveRecallLSI(self, filename="TestScores/recallLSI.csv"):
+		with open(filename, "w") as f:
+			f.write("query_id,recall\n")
+			for i, score in enumerate(self.recall_lsi, 1):
+				f.write(f"{i},{score:.4f}\n")

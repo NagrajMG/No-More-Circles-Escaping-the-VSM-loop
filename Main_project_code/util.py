@@ -9,6 +9,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from math import log10, sqrt
 import math
+import pandas as pd
+from scipy.stats import ttest_rel
 from nltk.stem import WordNetLemmatizer
 from nltk.stem import PorterStemmer
 from nltk.tokenize import TreebankWordTokenizer

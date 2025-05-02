@@ -2,7 +2,7 @@ from util import *
 from collections import defaultdict
 class InformationRetrieval():
 
-    def _init_(self):
+    def __init__(self):
         self.index = None
         # self.start_time = None
         # self.end_time = None
@@ -24,6 +24,7 @@ class InformationRetrieval():
         None
         """
         self.docs = docs
+        self.docIDs = docIDs
         posting = {}
         # Iterating over the documents
         for id in docIDs: 
@@ -121,7 +122,7 @@ class InformationRetrieval():
 
         return hidden_docs, hidden_queries
     
-    def rank(self, queries, method):
+    def rank(self, queries, method, cluster=False):
         """
         Rank the documents according to relevance for each query
 
@@ -140,11 +141,14 @@ class InformationRetrieval():
         # Accessing the document vectors
         docvectors = self.docvectors
         if method=='LSI':
-            docvectors, queryvectors=self.LSI(k= 160 , docvectors=docvectors, queryvectors=queryvectors)
-            # kmeans_model = MiniBatchKMeans(n_clusters=40, random_state=42)
-            # doc_labels = kmeans_model.fit_predict(docvectors)
-            # cluster_id = kmeans_model.predict(queryvectors.reshape(1, -1))[0]
-            return self.orderDocs(docvectors, queryvectors)
+            docvectors_lsi, queryvectors_lsi=self.LSI(k= 160 , docvectors=docvectors, queryvectors=queryvectors)
+            # if cluster:
+            #     kmeans_model = MiniBatchKMeans(n_clusters=, random_state=42)
+            #     doc_labels = kmeans_model.fit_predict(docvectors_lsi)
+            #     cluster_id = kmeans_model.predict(np.array(queryvectors_lsi[0]).reshape(1, -1))[0]
+            #     docvectors_lsi = docvectors_lsi[doc_labels == cluster_id]
+            #     # Get the cluster labels for each document vector
+            return self.orderDocs(docvectors_lsi, queryvectors_lsi)
         elif method == 'VSM':
             return self.orderDocs(docvectors, queryvectors)
         else:

@@ -206,7 +206,8 @@ class SearchEngine:
 			nDCGs.append(nDCG)
 			print("MAP, nDCG @ " +  
 				str(k) + " : " + str(MAP) + ", " + str(nDCG))
-
+        
+		self.evaluator.saveRecallLSI()
 		# Plot the metrics and save plot 
 		plt.plot(range(1, 11), precisions, label="Precision")
 		plt.plot(range(1, 11), recalls, label="Recall")
@@ -302,9 +303,11 @@ class SearchEngine:
 
 
 	def handleCustomQuery(self):
-		"""
-		Take a custom query as input and return top five relevant documents
-		"""
+		
+		if self.args.model == "LSI" :
+			self.args.out_folder += "final_model/"
+		else:
+			self.args.out_folder += "baseline/"
 
 		#Get query
 		print("Enter query below")
@@ -332,8 +335,8 @@ class SearchEngine:
 		# Rank the documents for the query
 		model_args = self.args.model
 
-		doc_IDs_ordered = self.informationRetriever.rank([processedQuery], model_args)[0]
-
+		doc_IDs_ordered = self.informationRetriever.rank([processedQuery], model_args, self.args.clustering == "True")[0]
+        
 		self.end_time = time.time()
 
 		# Print the IDs of first five documents
