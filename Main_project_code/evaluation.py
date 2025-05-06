@@ -559,3 +559,68 @@ class Evaluation():
 			f.write("query_id,AP\n")
 			for i, score in enumerate(self.ap_lsi, 1):
 				f.write(f"{i},{score:.4f}\n")
+
+
+
+	def savePrecisioncb(self, filename="TestScores/Stopwords/precisionCB.csv"):
+		with open(filename, "w") as f:
+			f.write("query_id,precision\n")
+			for i, score in enumerate(self.precision_lsi, 1):
+				f.write(f"{i},{score:.4f}\n")
+
+	def saveFscorecb(self, filename="TestScores/Stopwords/fscoreCB.csv"):
+		with open(filename, "w") as f:
+			f.write("query_id,fscore\n")
+			for i, score in enumerate(self.fscore_lsi, 1):
+				f.write(f"{i},{score:.4f}\n")
+
+
+	def savenDCGcb(self, filename="TestScores/Stopwords/nDCGCB.csv"):
+		with open(filename, "w") as f:
+			f.write("query_id,nDCG\n")
+			for i, score in enumerate(self.ndcg_lsi, 1):
+				f.write(f"{i},{score:.4f}\n")
+
+	def saveAPcb(self, filename="TestScores/Stopwords/APCB.csv"):
+		with open(filename, "w") as f:
+			f.write("query_id,AP\n")
+			for i, score in enumerate(self.ap_lsi, 1):
+				f.write(f"{i},{score:.4f}\n")
+
+	def saveRecallcb(self, filename="TestScores/Stopwords/RecallCB.csv"):
+		with open(filename, "w") as f:
+			f.write("query_id,recall\n")
+			for i, score in enumerate(self.recall_lsi, 1):
+				f.write(f"{i},{score:.4f}\n")
+
+
+	def savePrecisionstem(self, filename="TestScores/Reducer/precisionstem.csv"):
+		with open(filename, "w") as f:
+			f.write("query_id,precision\n")
+			for i, score in enumerate(self.precision_lsi, 1):
+				f.write(f"{i},{score:.4f}\n")
+
+	def saveFscorestem(self, filename="TestScores/Reducer/fscorestem.csv"):
+		with open(filename, "w") as f:
+			f.write("query_id,fscore\n")
+			for i, score in enumerate(self.fscore_lsi, 1):
+				f.write(f"{i},{score:.4f}\n")
+
+
+	def savenDCGstem(self, filename="TestScores/Reducer/nDCGstem.csv"):
+		with open(filename, "w") as f:
+			f.write("query_id,nDCG\n")
+			for i, score in enumerate(self.ndcg_lsi, 1):
+				f.write(f"{i},{score:.4f}\n")
+
+	def saveAPstem(self, filename="TestScores/Reducer/APstem.csv"):
+		with open(filename, "w") as f:
+			f.write("query_id,AP\n")
+			for i, score in enumerate(self.ap_lsi, 1):
+				f.write(f"{i},{score:.4f}\n")
+
+	def saveRecallstem(self, filename="TestScores/Reducer/Recallstem.csv"):
+		with open(filename, "w") as f:
+			f.write("query_id,recall\n")
+			for i, score in enumerate(self.recall_lsi, 1):
+				f.write(f"{i},{score:.4f}\n")

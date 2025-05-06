@@ -9,6 +9,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from math import log10, sqrt
 import math
+import contextlib
+import sys
 import pandas as pd
 from scipy.stats import ttest_rel
 from nltk.stem import WordNetLemmatizer
@@ -18,10 +20,10 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from nltk.tokenize import PunktSentenceTokenizer
 from nltk.corpus import wordnet
 from nltk.corpus import stopwords
-nltk.download('averaged_perceptron_tagger_eng')
-nltk.download('wordnet')
-nltk.download('stopwords')
-nltk.download('punkt')
+# nltk.download('averaged_perceptron_tagger_eng')
+# nltk.download('wordnet')
+# nltk.download('stopwords')
+# nltk.download('punkt')
 from sklearn.cluster import MiniBatchKMeans
 # Add any utility functions here
 
