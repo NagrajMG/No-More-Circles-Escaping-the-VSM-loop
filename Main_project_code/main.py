@@ -37,7 +37,8 @@ class SearchEngine:
 		self.autocompleter = Trie()
 		self.start_time = None
 		self.end_time = None
-
+		# change k for models with less retrieved docs
+		self.k = 1
 	def segmentSentences(self, text):
 		"""
 		Call the required sentence segmenter
@@ -151,6 +152,7 @@ class SearchEngine:
 		  for all queries in the Cranfield dataset
 		- produces graphs of the evaluation metrics in the output folder
 		"""
+		self.start_time = time.time()
 		if self.args.model == "LSI" or self.args.model == None:
 			self.args.out_folder += "final_model/"
 		else:
@@ -175,17 +177,24 @@ class SearchEngine:
 
 		# Accessing the model args
 		model_args = self.args.model
-
-
-		# Rank the documents for each query and the method to use
-		doc_IDs_ordered = self.informationRetriever.rank(processedQueries, model_args)
         
+		# If the users has some new documents, we will perform Recomputation on SVD 
+		recompute = (self.args.recompute == "True")
+       
+		# Rank the documents for each query and the method to use
+		doc_IDs_ordered = self.informationRetriever.rank(processedQueries, model_args, recompute = recompute)
+
+		self.end_time = time.time()
 		# Read relevance judements
 		qrels = json.load(open(args.dataset + "cran_qrels.json", 'r'))[:]
 
 		# Calculate precision, recall, f-score, MAP and nDCG for k = 1 to 10
 		precisions, recalls, fscores, MAPs, nDCGs = [], [], [], [], []
-		for k in range(1, 11):
+
+		K = self.k + 1
+		print("Using the value of k for evaluation = " + str(K - 1))
+		
+		for k in range(1, K):
 			precision = self.evaluator.meanPrecision(
 				doc_IDs_ordered, query_ids, qrels, k)
 			precisions.append(precision)
@@ -207,18 +216,18 @@ class SearchEngine:
 			print("MAP, nDCG @ " +  
 				str(k) + " : " + str(MAP) + ", " + str(nDCG))
         
-		self.evaluator.saveRecallstem()
-		self.evaluator.savePrecisionstem()
-		self.evaluator.saveFscorestem()
-		self.evaluator.saveAPstem()
-		self.evaluator.savenDCGstem()
+		# self.evaluator.saveRecallstem()
+		# self.evaluator.savePrecisionstem()
+		# self.evaluator.saveFscorestem()
+		# self.evaluator.saveAPstem()
+		# self.evaluator.savenDCGstem()
 
 		# Plot the metrics and save plot 
-		plt.plot(range(1, 11), precisions, label="Precision")
-		plt.plot(range(1, 11), recalls, label="Recall")
-		plt.plot(range(1, 11), fscores, label="F-Score")
-		plt.plot(range(1, 11), MAPs, label="MAP")
-		plt.plot(range(1, 11), nDCGs, label="nDCG")
+		plt.plot(range(1, K), precisions, label="Precision")
+		plt.plot(range(1, K), recalls, label="Recall")
+		plt.plot(range(1, K), fscores, label="F-Score")
+		plt.plot(range(1, K), MAPs, label="MAP")
+		plt.plot(range(1, K), nDCGs, label="nDCG")
 		plt.legend()
 		plt.title("Evaluation Metrics - Cranfield Dataset")
 		plt.xlabel("k")
@@ -271,7 +280,7 @@ class SearchEngine:
 			writer.writerow(["k", "Recall@6", "MAP@6"])
 			for k in k_values:
 				print(f"Evaluating k = {k}...")
-				docs_k, queries_k = self.informationRetriever.LSI(k, self.informationRetriever.docvectors, queryvectors)
+				docs_k, queries_k = self.informationRetriever.LSI(k, self.informationRetriever.docvectors, queryvectors, recompute = True)
 				ranked_docs = self.informationRetriever.orderDocs(docs_k, queries_k, k=recall_at_k)
 				recall = self.evaluator.meanRecall(ranked_docs, query_ids, qrels, recall_at_k)
 				recall_scores.append(recall)
@@ -339,8 +348,10 @@ class SearchEngine:
 		self.informationRetriever.buildIndex(processedDocs, doc_ids)
 		# Rank the documents for the query
 		model_args = self.args.model
+		# If the users has some new documents, we will perform Recomputation on SVD 
+		recompute = (self.args.recompute == "True")
 
-		doc_IDs_ordered = self.informationRetriever.rank([processedQuery], model_args, self.args.clustering == "True")[0]
+		doc_IDs_ordered = self.informationRetriever.rank([processedQuery], method = model_args, recompute = recompute)[0]
         
 		self.end_time = time.time()
 
@@ -357,7 +368,7 @@ if __name__ == "__main__":
 	parser = argparse.ArgumentParser(description='main.py')
     
 	# Tunable parameters as external arguments
-	parser.add_argument('-model', default='LSI', help="Model Type [VSM|LSI]")
+	parser.add_argument('-model', default='LSI', help="Model Type [VSM|LSI|clustering]")
 	parser.add_argument('-dataset', default = "cranfield/", 
 						help = "Path to the dataset folder")
 	parser.add_argument('-out_folder', default = "Main_project_output/", 
@@ -376,8 +387,8 @@ if __name__ == "__main__":
                         help="Autocomplete")
 	parser.add_argument('-findK', default = "False",
 						help = "Find the best k for LSI")
-	parser.add_argument('-clustering', default = "False",
-						help = "Perform clustering")
+	parser.add_argument('-recompute', default = "False",
+						help = "Recompute the SVD for LSI [True|False]")
 	
 	# Parse the input arguments
 	args = parser.parse_args()
@@ -391,9 +402,12 @@ if __name__ == "__main__":
 		searchEngine.handleCustomQuery()
 		# end_time = time.time()
 		print("-------------------------------------------------------------------------------------------------------------")
-		print(f"Time taken by the IR system to output five relevant documents: " + str(searchEngine.end_time - searchEngine.start_time) + " seconds")
+		print(f"Time taken by the IR system to output ten relevant documents: " + str(searchEngine.end_time - searchEngine.start_time) + " seconds")
 		print("-------------------------------------------------------------------------------------------------------------")
 	elif args.findK == "True" and args.model == "LSI":
 		searchEngine.tuningLSI()
 	else:
 		searchEngine.evaluateDataset()
+		print("-------------------------------------------------------------------------------------------------------------")
+		print(f"Time taken by the IR system to evaluate the " + str(searchEngine.args.model)+ " model: " + str(searchEngine.end_time - searchEngine.start_time) + " seconds")
+		print("-------------------------------------------------------------------------------------------------------------")

@@ -71,8 +71,9 @@ class InformationRetrieval():
             docvectors.append(docvector)
 
         # Storing the document vectors with tfidf 
-        self.docvectors = docvectors   
-        print(f"Shape of document vectors: ",np.array(docvectors).shape)  
+        self.docvectors = docvectors  
+        # np.save("Main_project_code/fast_search/output/originalDocs.npy", docvectors)
+        # print(f"Shape of document vectors: ",np.array(docvectors).shape)  
 
     def transformQuery(self, queries):
         """Building the TFIDF for the query"""
@@ -89,10 +90,10 @@ class InformationRetrieval():
             queryvectors.append(queryvector)
         # Storing the qyery vectors with tfidf 
           
-        print(f"Shape of query vectors: ",np.array(queryvectors).shape) 
+        # print(f"Shape of query vectors: ",np.array(queryvectors).shape) 
         return queryvectors    
 
-    def LSI(self, k, docvectors, queryvectors): 
+    def LSI(self, k, docvectors, queryvectors, recompute): 
         """
         Apply Latent Semantic Indexing (LSI) to the document and query vectors.
         Parameters
@@ -110,19 +111,64 @@ class InformationRetrieval():
         - The first array consists of the hidden concepts document vectors.
         - The second array consists of the hidden concepts query vectors.        
 """     
-        # Perform Singular Value Decomposition (SVD) on the document vectors
-        U, S, VT = np.linalg.svd(np.array(docvectors).T)
+        hidden_docs = None
+        U_k = None
+        S_k = None
+        if recompute:
+            # Perform Singular Value Decomposition (SVD) on the document vectors
+            U, S, VT = np.linalg.svd(np.array(docvectors).T)
+            U_k = U[:, :k] # Retain the first k columns of U
+            VT_k = VT[:k, :] # Retain the first k rows of VT
+            S_k = np.diag(S[:k]) # Create a diagonal matrix of the first k singular values
+            hidden_docs = (S_k @ VT_k).T
+            # Save the hidden documents and SVD components to files
+            np.save("Main_project_code/fast_search/output/approximatedDocs.npy", hidden_docs)
+            np.save("Main_project_code/fast_search/output/Hanger.npy", U_k)
+            np.save("Main_project_code/fast_search/output/Stretcher.npy", S_k)
+            print("SVD computed and saved.")
+        else:
+            hidden_docs = np.load("Main_project_code/fast_search/output/approximatedDocs.npy")
+            U_k = np.load("Main_project_code/fast_search/output/Hanger.npy")
+            S_k = np.load("Main_project_code/fast_search/output/Stretcher.npy")
+            print("Using precomputed SVD.")
 
-        U_k = U[:, :k] # Retain the first k columns of U
-        VT_k = VT[:k, :] # Retain the first k rows of VT
-        S_k = np.diag(S[:k]) # Create a diagonal matrix of the first k singular values
-        
-        hidden_docs = (S_k @ VT_k).T
         hidden_queries = np.array(queryvectors) @ U_k @ np.linalg.pinv(S_k) 
-
         return hidden_docs, hidden_queries
     
-    def rank(self, queries, method, cluster=False):
+    def doClustering(self,docvectors,queryvectors):
+        """ Perform KMeans clustering on the document vectors."""
+
+        doc_labels = np.load("Main_project_code/fast_search/output/cluster_labels.npy")
+        centroids = np.load("Main_project_code/fast_search/output/centroids.npy")
+
+        doc_IDs_ordered = []
+        for query in queryvectors:
+            queryNorm = np.linalg.norm(query)
+            if queryNorm == 0:
+                doc_IDs_ordered.append([])
+                continue
+
+            # Calculate the cosine similarity between the query and each centroid
+            cluster_sim = cosine_similarity(query.reshape(1, -1), centroids)
+            best_cluster = np.argmax(cluster_sim)
+            # Get the document IDs for the best cluster
+            doc_ids_in_cluster = np.where(doc_labels == best_cluster)[0]
+            #Compute cosine similarity with only those docs
+            temp = {}
+            for doc_id in doc_ids_in_cluster:
+                doc = docvectors[doc_id]
+                docNorm = np.linalg.norm(doc)
+                if docNorm != 0:
+                    cosine = np.dot(query, doc) / (queryNorm * docNorm)
+                else:
+                    cosine = 0
+                temp[doc_id + 1] = cosine
+
+            scores = sorted(temp.items(), key=lambda item: item[1], reverse=True)[:10]
+            doc_IDs_ordered.append([doc[0] for doc in scores])
+        return doc_IDs_ordered
+
+    def rank(self, queries, method, recompute):
         """
         Rank the documents according to relevance for each query
 
@@ -141,19 +187,15 @@ class InformationRetrieval():
         # Accessing the document vectors
         docvectors = self.docvectors
         if method=='LSI':
-            docvectors_lsi, queryvectors_lsi=self.LSI(k= 160 , docvectors=docvectors, queryvectors=queryvectors)
-            # if cluster:
-            #     kmeans_model = MiniBatchKMeans(n_clusters=, random_state=42)
-            #     doc_labels = kmeans_model.fit_predict(docvectors_lsi)
-            #     cluster_id = kmeans_model.predict(np.array(queryvectors_lsi[0]).reshape(1, -1))[0]
-            #     docvectors_lsi = docvectors_lsi[doc_labels == cluster_id]
-            #     # Get the cluster labels for each document vector
+            docvectors_lsi, queryvectors_lsi = self.LSI(k= 160 , docvectors=docvectors, queryvectors=queryvectors, recompute = recompute)
             return self.orderDocs(docvectors_lsi, queryvectors_lsi)
         elif method == 'VSM':
             return self.orderDocs(docvectors, queryvectors)
+        elif method == "clustering":
+            return self.doClustering(docvectors,queryvectors)
         else:
             print(f'Invalid model argument: {method}')
-            print(f'Available Methods: VSM, LSI')
+            print(f'Available Methods: VSM, LSI, clustering')
             quit()
 
     

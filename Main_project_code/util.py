@@ -18,13 +18,16 @@ from nltk.stem import PorterStemmer
 from nltk.tokenize import TreebankWordTokenizer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from nltk.tokenize import PunktSentenceTokenizer
+from sklearn.metrics.pairwise import cosine_similarity
 from nltk.corpus import wordnet
 from nltk.corpus import stopwords
+from yaspin import yaspin
+from typing import Optional
 # nltk.download('averaged_perceptron_tagger_eng')
 # nltk.download('wordnet')
 # nltk.download('stopwords')
 # nltk.download('punkt')
-from sklearn.cluster import MiniBatchKMeans
+from sklearn.cluster import KMeans
 # Add any utility functions here
 
 delimiter = r'[.?!]'

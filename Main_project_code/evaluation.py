@@ -494,6 +494,8 @@ class Evaluation():
 		
 		return meanAveragePrecision
 	
+
+# Save the evaluation scores to CSV files (in the TestScores directory)	
 	def saveRecallLSI(self, filename="TestScores/recallLSI.csv"):
 		with open(filename, "w") as f:
 			f.write("query_id,recall\n")
