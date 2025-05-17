@@ -7,10 +7,8 @@ from evaluation import Evaluation
 from autocompletion import *
 from sys import version_info
 import argparse
-import json
-import matplotlib.pyplot as plt
-import time
 from util import *
+from spell_check import *
 # Input compatibility for Python 2 and Python 3
 if version_info.major == 3:
     pass
@@ -38,7 +36,7 @@ class SearchEngine:
 		self.start_time = None
 		self.end_time = None
 		# change k for models with less retrieved docs
-		self.k = 1
+		self.k = 10
 	def segmentSentences(self, text):
 		"""
 		Call the required sentence segmenter
@@ -326,8 +324,7 @@ class SearchEngine:
 		#Get query
 		print("Enter query below")
 		query = input()
-
-	
+		
 		# If the user wants to use autocomplete, we will use the Trie data structure to get the query
 		if(self.args.autocomplete):
 			query = self.autocompleter.takeInput(query)

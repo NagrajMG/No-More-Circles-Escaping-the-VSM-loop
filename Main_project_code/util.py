@@ -11,7 +11,9 @@ from math import log10, sqrt
 import math
 import contextlib
 import sys
+import argparse
 import pandas as pd
+# from nltk.corpus import wordnet
 from scipy.stats import ttest_rel
 from nltk.stem import WordNetLemmatizer
 from nltk.stem import PorterStemmer
@@ -23,10 +25,10 @@ from nltk.corpus import wordnet
 from nltk.corpus import stopwords
 from yaspin import yaspin
 from typing import Optional
-# nltk.download('averaged_perceptron_tagger_eng')
-# nltk.download('wordnet')
-# nltk.download('stopwords')
-# nltk.download('punkt')
+nltk.download('averaged_perceptron_tagger_eng')
+nltk.download('wordnet')
+nltk.download('stopwords')
+nltk.download('punkt')
 from sklearn.cluster import KMeans
 # Add any utility functions here
 

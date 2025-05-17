@@ -1,1 +1,0 @@
-# No-more-circles-Escaping-the-VSM-loop
