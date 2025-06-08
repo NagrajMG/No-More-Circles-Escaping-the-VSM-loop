@@ -26,7 +26,7 @@ options:
 
 ##  Project Directory Structure
 
-```bash
+```python
 ├── cranfield/                        # Dataset folder
 ├── Main_project_code/               # Core project code
 │   ├── __pycache__/                 # Compiled Python files (auto-generated)
