@@ -1,13 +1,14 @@
-# Information Retrieval System – Course Project Report
+# Search Engine - based upon Cranfield dataset
 
 This project implements a modular and extensible Information Retrieval (IR) system capable of indexing and ranking documents using multiple models, preprocessing strategies, and evaluation metrics.
 
 ## Follow the steps to explore the project:
-
-Ensure you are inside the "No-More-Circles-Escaping-the-VSM-loop" folder.
+```bash
+cd No-More-Circles-Escaping-the-VSM-loop
+```
 
 Try:
-```bash
+```python
 python Main_project_code\main.py 
 ```
 options:
