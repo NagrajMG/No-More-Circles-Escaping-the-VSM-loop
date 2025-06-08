@@ -3,7 +3,7 @@
 This project implements a modular and extensible Information Retrieval (IR) system capable of indexing and ranking documents using multiple models, preprocessing strategies, and evaluation metrics.
 
 ## Follow the steps to explore the project:
-```bash
+```python
 cd No-More-Circles-Escaping-the-VSM-loop
 ```
 
