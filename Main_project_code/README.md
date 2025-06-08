@@ -3,7 +3,7 @@
 This project implements a modular and extensible Information Retrieval (IR) system capable of indexing and ranking documents using multiple models, preprocessing strategies, and evaluation metrics.
 
 ## Follow the steps to explore the project:
-```python
+```bash
 cd No-More-Circles-Escaping-the-VSM-loop
 ```
 
@@ -26,7 +26,7 @@ options:
 
 ##  Project Directory Structure
 
-```python
+```bash
 ├── cranfield/                        # Dataset folder
 ├── Main_project_code/               # Core project code
 │   ├── __pycache__/                 # Compiled Python files (auto-generated)
