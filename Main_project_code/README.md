@@ -2,14 +2,14 @@
 
 This project implements a modular and extensible Information Retrieval (IR) system capable of indexing and ranking documents using multiple models, preprocessing strategies, and evaluation metrics.
 
-# Follow the steps to explore the project:
+## Follow the steps to explore the project:
 
 Ensure you are inside the "No-More-Circles-Escaping-the-VSM-loop" folder.
 
 Try:
-
-python Main_project_code\main.py --> then try the following options:
-
+```bash
+python Main_project_code\main.py 
+```
 options:
 -model MODEL          Model Type [VSM|LSI|clustering]
 -dataset DATASET      Path to the dataset folder
